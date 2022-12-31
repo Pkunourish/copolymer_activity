@@ -6,6 +6,7 @@ import matplotlib.colors
 import matplotlib.ticker
 import matplotlib as mpl
 from scipy.stats import pearsonr
+from sklearn.feature_selection import VarianceThreshold
 
 def visualize3D():
     data = pd.read_csv('data/trainval.csv')
@@ -87,9 +88,9 @@ def pearsonfig():
     X = data.drop(['Activity'], axis=1).values
     data['Activity_var'] = data['Activity'] - data['weighted']
     y = data['Activity'].values
-    y_var = data['Activity_var'].values
 
-    temp = np.hstack([X, y.reshape(-1, 1)])
+    sel_X = VarianceThreshold(threshold = (.9 * (1- .9)))
+    temp = np.hstack([sel_X.fit_transform(X), y.reshape(-1, 1)])
     nfeature = temp.shape[1]
     corrmat = np.ones((nfeature, nfeature), dtype = float)
     for i in range(nfeature):
@@ -99,6 +100,7 @@ def pearsonfig():
     pearsonfig.matshow(corrmat, cmap = mpl.cm.spring)
     fig.colorbar(plt.cm.ScalarMappable(cmap=mpl.cm.spring), ax = pearsonfig)
     plt.savefig("Pearson.png")
+
 
 if __name__ == '__main__':
     visualize3D()
